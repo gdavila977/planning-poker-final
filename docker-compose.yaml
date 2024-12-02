@@ -3,7 +3,7 @@ version: "3.8"
 services:
   mongodb:
     image: mongo:latest
-    container_name: mongodb
+    container_name: mongodb-planning
     ports:
       - "27017:27017"
     volumes:
