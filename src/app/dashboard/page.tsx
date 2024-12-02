@@ -20,6 +20,7 @@ import { Toast, ToastType } from '@/components/ui/Toast';
 
 export default function DashboardPage() {
     const router = useRouter();
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [user, setUser] = useState(AuthService.getUserSession());
     const [sessions, setSessions] = useState<SessionDocument[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -100,7 +101,8 @@ export default function DashboardPage() {
     };
 
     // Función para mostrar el toast
-    const showToast = (message: string, type: ToastType) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars 
+    const showToast = (message: string, type: ToastType) => { //ACTUALMENTE NO SE ESTA USANDO EL SHOWTOAST PERO NO LO ELIMINO POR SI MAS ADELTANTE SE OCUPA
         setToast({ message, type });
         setTimeout(() => setToast(null), 3000);
     };
@@ -185,7 +187,10 @@ export default function DashboardPage() {
                                         <span>{new Date(session.createdAt).toLocaleDateString()}</span>
                                     </div>
                                     <button
-                                        onClick={() => router.push(`/session/${session.sessionId}`)}
+                                        onClick={() => {
+                                            localStorage.setItem('currentSession', JSON.stringify(session));
+                                            router.push('/stories');
+                                        }}
                                         className="mt-4 w-full py-2 px-4 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors"
                                     >
                                         Ver historias de la sesión

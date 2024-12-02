@@ -1,5 +1,5 @@
-// Ruta del archivo: /src/app/api/sessions-api/route.ts
-
+/* eslint-disable @typescript-eslint/no-unused-vars */
+// /src/app/api/sessions-api/route.ts
 import { NextResponse } from 'next/server';
 import { getCollection } from '@/lib/db/mongodb';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -18,7 +18,6 @@ export async function GET() {
             sessions
         } as SessionResponse);
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
         return NextResponse.json({
             success: false,
