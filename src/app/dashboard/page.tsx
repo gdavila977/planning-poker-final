@@ -251,7 +251,7 @@ export default function DashboardPage() {
                                         title="descripcion de la sesión"
                                         value={newSession.name}
                                         onChange={(e) => setNewSession({...newSession, name: e.target.value})}
-                                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+                                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-black"
                                         required
                                     />
                                 </div>
@@ -263,7 +263,7 @@ export default function DashboardPage() {
                                         title="Descripción de la sesión"
                                         value={newSession.description}
                                         onChange={(e) => setNewSession({...newSession, description: e.target.value})}
-                                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+                                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-black"
                                         rows={3}
                                         required
                                     />

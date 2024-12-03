@@ -194,13 +194,19 @@ export default function StoriesPage() {
                                     </div>
                                 )}
                                 <button
-                                    onClick={() => {/* TODO: Implementar votación */}}
+                                    onClick={() => {
+                                        localStorage.removeItem('currentStory'); // Limpiamos cualquier historia previa
+                                        localStorage.setItem('currentStory', JSON.stringify(story));
+                                        router.push('/stories/vote');
+                                    }}
                                     className="mt-4 w-full py-2 px-4 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors"
                                     disabled={story.status === 'completed'}
                                 >
                                     {story.status === 'completed' 
                                         ? 'Votación completada' 
-                                        : 'Participar en votación'}
+                                        : story.status === 'voting'
+                                        ? 'Participar en votación'
+                                        : 'Votación pendiente'}
                                 </button>
                             </div>
                         ))}
@@ -257,7 +263,7 @@ export default function StoriesPage() {
                                         title='Título de la historia'
                                         value={newStory.title}
                                         onChange={(e) => setNewStory({...newStory, title: e.target.value})}
-                                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+                                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-black"
                                         required
                                     />
                                 </div>
@@ -269,7 +275,7 @@ export default function StoriesPage() {
                                         placeholder='Descripción de la historia'
                                         value={newStory.description}
                                         onChange={(e) => setNewStory({...newStory, description: e.target.value})}
-                                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+                                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-black"
                                         rows={3}
                                         required
                                     />
@@ -283,7 +289,7 @@ export default function StoriesPage() {
                                         type="number"
                                         value={newStory.timeLimit}
                                         onChange={(e) => setNewStory({...newStory, timeLimit: parseInt(e.target.value)})}
-                                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+                                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-black"
                                         min="1"
                                         required
                                     />
@@ -300,7 +306,7 @@ export default function StoriesPage() {
                                             ...newStory, 
                                             initialEstimate: e.target.value ? parseInt(e.target.value) : null
                                         })}
-                                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+                                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-black"
                                         min="0"
                                     />
                                 </div>

@@ -4,7 +4,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Camera } from 'lucide-react';
+import { Camera } from 'lucide-react'; 
 import { AuthService } from '@/lib/services/authService';
 import { LoginCredentials } from '@/lib/models/auth';
 
