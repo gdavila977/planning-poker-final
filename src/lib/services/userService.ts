@@ -2,6 +2,12 @@
 
 import { User } from '@/lib/models/auth';
 
+interface UserResponse {
+    success: boolean;
+    message: string;
+    users?: User[];
+}
+
 export class UserService {
     static async getDevelopers(): Promise<User[]> {
         try {
@@ -11,6 +17,26 @@ export class UserService {
         } catch (error) {
             console.error('Error al obtener developers:', error);
             return [];
+        }
+    }
+
+    static async getUsersByIds(userIds: string[]): Promise<UserResponse> {
+        try {
+            const response = await fetch('/api/users-api/details', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ userIds }),
+            });
+            return await response.json();
+        } catch (error) {
+            console.error('Error al obtener usuarios:', error);
+            return {
+                success: false,
+                message: 'Error al obtener usuarios',
+                users: []
+            };
         }
     }
 }

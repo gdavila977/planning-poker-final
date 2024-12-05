@@ -2,92 +2,66 @@
 
 import { NextResponse } from 'next/server';
 import { getCollection } from '@/lib/db/mongodb';
+import { AuthService } from '@/lib/services/authService';
 
 export async function GET(request: Request) {
     try {
         const { searchParams } = new URL(request.url);
         const storyId = searchParams.get('storyId');
-        const userId = searchParams.get('userId');
-
-        if (!storyId) {
-            return NextResponse.json({
-                success: false,
-                message: 'ID de historia no proporcionado'
-            }, { status: 400 });
-        }
 
         const votesCollection = await getCollection('votos');
-
-        // Si se proporciona userId, buscar voto específico
-        if (userId) {
-            const vote = await votesCollection.findOne({ storyId, userId });
-            return NextResponse.json({
-                success: true,
-                vote
-            });
-        }
-
-        // Si no hay userId, retornar todos los votos de la historia
         const votes = await votesCollection
             .find({ storyId })
             .toArray();
 
         return NextResponse.json({
             success: true,
+            message: 'Votos obtenidos con éxito',
             votes
         });
 
     } catch (error) {
-        console.error('Error al obtener votos:', error);
+        console.error('Error obteniendo votos:', error);
         return NextResponse.json({
             success: false,
-            message: 'Error al obtener los votos'
+            message: 'Error al obtener los votos',
+            votes: []
         }, { status: 500 });
     }
 }
 
 export async function POST(request: Request) {
     try {
-        const { storyId, userId, value, comment } = await request.json();
-        
-        if (!userId) {
+        const { storyId, value, comment } = await request.json();
+        const user = AuthService.getUserSession();
+        if (!user) {
             return NextResponse.json({
                 success: false,
                 message: 'Usuario no autenticado'
             }, { status: 401 });
         }
 
-        // El resto del código se mantiene igual
         const votesCollection = await getCollection('votos');
-        const existingVote = await votesCollection.findOne({
-            storyId,
-            userId
-        });
-
-        if (existingVote) {
-            return NextResponse.json({
-                success: false,
-                message: 'Ya has votado en esta historia'
-            }, { status: 400 });
-        }
-
+        
         const newVote = {
             voteId: Date.now().toString(),
             storyId,
-            userId,    // Usamos el userId recibido
+            userId: user.userId,
             voto: value,
             comment,
             createdAt: new Date().toISOString()
         };
 
         await votesCollection.insertOne(newVote);
+
         return NextResponse.json({
             success: true,
             message: 'Voto registrado con éxito',
             vote: newVote
         });
+
     } catch (error) {
-        console.error('Error al registrar voto:', error);
+        console.error('Error registrando voto:', error);
         return NextResponse.json({
             success: false,
             message: 'Error al registrar el voto'

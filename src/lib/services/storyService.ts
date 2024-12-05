@@ -50,4 +50,25 @@ export class StoryService {
             };
         }
     }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    static async updateStoryStatus(storyId: string, status: 'pending' | 'voting' | 'completed'): Promise<any> {
+        try {
+            const response = await fetch(`/api/stories-api`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ storyId, status }),
+            });
+            return await response.json();
+        } catch (error) {
+            return {
+                success: false,
+                message: 'Error al actualizar el estado de la historia'
+            };
+        }
+    }
+
+    
 }

@@ -68,3 +68,30 @@ export async function POST(request: Request) {
         }, { status: 500 });
     }
 }
+
+export async function PATCH(request: Request) {
+    try {
+        const { storyId, status } = await request.json();
+        
+        const storiesCollection = await getCollection('stories');
+        
+        await storiesCollection.updateOne(
+            { storyId },
+            { $set: { status } }
+        );
+
+        const updatedStory = await storiesCollection.findOne({ storyId });
+
+        return NextResponse.json({
+            success: true,
+            message: 'Estado actualizado con éxito',
+            story: updatedStory
+        });
+    } catch (error) {
+        console.error('Error updating story status:', error);
+        return NextResponse.json({
+            success: false,
+            message: 'Error al actualizar el estado'
+        }, { status: 500 });
+    }
+}
