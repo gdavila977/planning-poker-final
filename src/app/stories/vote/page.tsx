@@ -66,6 +66,15 @@ export default function VotePage() {
         loadInitialData();
     }, []);
 
+    useEffect(() => {
+        console.log('%c Estados actualizados:', 'background: #222; color: #bada55', { 
+            allVoted, 
+            isVotingStarted, 
+            showVotes,
+            userRole: user?.role 
+        });
+    }, [allVoted, isVotingStarted, showVotes]);
+
     const handleStartVoting = async () => {
         if (!story) return;
         
@@ -98,7 +107,47 @@ export default function VotePage() {
     };
 
     const handleAllVoted = () => {
+        console.log('handleAllVoted llamado, actualizando estado');
         setAllVoted(true);
+        // También podríamos mostrar un toast informando al PM que puede revelar los votos
+        if (user?.role === 'project_manager') {
+            console.log('Es PM, mostrando toast');
+            setToast({ message: 'Todos han votado. Puede revelar los votos.', type: 'success' });
+        }
+    };
+
+    const handleRevealVotes = async () => {
+        if (!story) return;
+    
+        try {
+            // Obtener todos los votos
+            const votesResponse = await VoteService.getVotesByStory(story.storyId);
+            
+            if (votesResponse.success && votesResponse.votes && votesResponse.votes.length > 0) {
+                // Calcular promedio
+                const votes = votesResponse.votes.map(v => v.voto);
+                const finalEstimate = Math.round(votes.reduce((a, b) => a + b) / votes.length);
+                
+                // Actualizar estado de la historia
+                const response = await StoryService.updateStoryStatus(story.storyId, 'completed');
+                
+                if (response.success) {
+                    const updatedStory = {
+                        ...story,
+                        status: 'completed' as const,
+                        finalEstimate
+                    };
+                    
+                    setStory(updatedStory);
+                    localStorage.setItem('currentStory', JSON.stringify(updatedStory));
+                    setShowVotes(true);
+                    setToast({ message: 'Votos revelados y estimación final calculada', type: 'success' });
+                }
+            }
+        } catch (error) {
+            console.error('Error revealing votes:', error);
+            setToast({ message: 'Error al revelar los votos', type: 'error' });
+        }
     };
 
     const handleTimeUp = async () => {
@@ -119,11 +168,6 @@ export default function VotePage() {
             console.error('Error al finalizar votación:', error);
             setToast({ message: 'Error al finalizar la votación', type: 'error' });
         }
-    };
-
-    const handleRevealVotes = () => {
-        setShowVotes(true);
-        setToast({ message: 'Votos revelados', type: 'success' });
     };
 
     const handleBackToStories = () => {

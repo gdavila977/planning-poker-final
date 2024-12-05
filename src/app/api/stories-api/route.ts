@@ -71,20 +71,24 @@ export async function POST(request: Request) {
 
 export async function PATCH(request: Request) {
     try {
-        const { storyId, status } = await request.json();
+        const { storyId, status, finalEstimate } = await request.json();
         
+        const updateData = {
+            status,
+            ...(finalEstimate !== undefined ? { finalEstimate } : {})
+        };
+
         const storiesCollection = await getCollection('stories');
-        
         await storiesCollection.updateOne(
             { storyId },
-            { $set: { status } }
+            { $set: updateData }
         );
 
         const updatedStory = await storiesCollection.findOne({ storyId });
 
         return NextResponse.json({
             success: true,
-            message: 'Estado actualizado con éxito',
+            message: 'Historia actualizada con éxito',
             story: updatedStory
         });
     } catch (error) {

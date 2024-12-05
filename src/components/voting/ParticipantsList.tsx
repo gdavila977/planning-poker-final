@@ -63,6 +63,7 @@ export default function ParticipantsList({
 
                     // Verificar si todos los developers han votado
                     if (participantsWithVotes.every(p => p.hasVoted)) {
+                        console.log('Todos han votado, llamando a onAllVoted');
                         onAllVoted();
                     }
                 } else {
