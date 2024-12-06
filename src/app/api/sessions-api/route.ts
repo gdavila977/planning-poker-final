@@ -5,11 +5,19 @@ import { getCollection } from '@/lib/db/mongodb';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { SessionResponse, CreateSessionRequest, PlanningSession, SessionDocument } from '@/lib/models/session';
 
-export async function GET() {
+export async function GET(request: Request) {
     try {
+        const { searchParams } = new URL(request.url);
+        const type = searchParams.get('type') || 'active';
+
         const sessionsCollection = await getCollection('sessions');
         const sessions = await sessionsCollection
-            .find({ status: 'active' })
+            .find({ 
+                status: type === 'active' 
+                    ? 'active'
+                    : { $in: ['completed', 'cancelled'] }
+            })
+            .sort({ createdAt: -1 })
             .toArray() as SessionDocument[];
 
         return NextResponse.json({

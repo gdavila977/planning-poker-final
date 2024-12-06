@@ -18,6 +18,12 @@ import {
 } from 'lucide-react';
 import { Toast, ToastType } from '@/components/ui/Toast';
 
+interface EditSessionState {
+    name: string;
+    description: string;
+    status: 'active' | 'completed' | 'cancelled';
+}
+
 export default function DashboardPage() {
     const router = useRouter();
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -34,21 +40,39 @@ export default function DashboardPage() {
     const [showEditModal, setShowEditModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [selectedSession, setSelectedSession] = useState<SessionDocument | null>(null);
-    const [editSession, setEditSession] = useState({ name: '', description: '' });
+    const [editSession, setEditSession] = useState<EditSessionState>({ 
+        name: '', 
+        description: '', 
+        status: 'active'
+    });
+    const [activeTab, setActiveTab] = useState<'active' | 'completed'>('active');
 
     useEffect(() => {
         loadSessions();
         if (user?.role === 'project_manager') {
             loadDevelopers();
         }
-    }, [user?.role]);
+    }, [user, activeTab]);
 
     const loadSessions = async () => {
         setIsLoading(true);
         try {
-            const response = await SessionService.getActiveSessions();
-            if (response.success && response.sessions) {
-                setSessions(response.sessions);
+            const response = activeTab === 'active' 
+                ? await SessionService.getActiveSessions()
+                : await SessionService.getSessionsByType('completed');
+    
+            if (response.success && response.sessions && user) {
+                let filteredSessions;
+                if (user.role === 'project_manager') {
+                    filteredSessions = response.sessions.filter((session: SessionDocument) => 
+                        session.createdBy === user.userId
+                    );
+                } else {
+                    filteredSessions = response.sessions.filter((session: SessionDocument) => 
+                        session.participants.includes(user.userId)
+                    );
+                }
+                setSessions(filteredSessions);
             }
         } catch (error) {
             console.error('Error al cargar sesiones:', error);
@@ -114,6 +138,7 @@ export default function DashboardPage() {
                 {
                     name: editSession.name,
                     description: editSession.description,
+                    status: editSession.status,
                     participants: selectedDevelopers
                 }
             );
@@ -197,8 +222,29 @@ export default function DashboardPage() {
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 {/* Actions Bar */}
                 <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-xl font-semibold text-gray-900">Sesiones Activas</h2>
-                    {user?.role === 'project_manager' && (
+                    <div className="flex space-x-4">
+                        <button
+                            onClick={() => setActiveTab('active')}
+                            className={`px-4 py-2 rounded-md transition-colors ${
+                                activeTab === 'active'
+                                    ? 'bg-blue-600 text-white'
+                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            }`}
+                        >
+                            Sesiones Activas
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('completed')}
+                            className={`px-4 py-2 rounded-md transition-colors ${
+                                activeTab === 'completed'
+                                    ? 'bg-blue-600 text-white'
+                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            }`}
+                        >
+                            Historial
+                        </button>
+                    </div>
+                    {user?.role === 'project_manager' && activeTab === 'active' && (
                         <button
                             onClick={() => setShowCreateModal(true)}
                             className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
@@ -232,7 +278,8 @@ export default function DashboardPage() {
                                                         setSelectedSession(session);
                                                         setEditSession({
                                                             name: session.name,
-                                                            description: session.description
+                                                            description: session.description,
+                                                           status: session.status || 'active'
                                                         });
                                                         setSelectedDevelopers(
                                                             session.participants.filter(id => id !== user.userId)
@@ -433,6 +480,25 @@ export default function DashboardPage() {
                                         rows={3}
                                         required
                                     />
+                                    <div>
+                                    <label className="block text-sm font-medium text-gray-700">
+                                        Estado
+                                    </label>
+                                    <select
+                                        title="Estado de la sesión"
+                                        name="status"
+                                        value={editSession.status}
+                                        onChange={(e) => setEditSession({
+                                            ...editSession,
+                                            status: e.target.value as 'active' | 'completed' | 'cancelled'
+                                        })}
+                                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-black"
+                                    >
+                                        <option value="active">Activa</option>
+                                        <option value="completed">Completada</option>
+                                        <option value="cancelled">Cancelada</option>
+                                    </select>
+                                </div>
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">

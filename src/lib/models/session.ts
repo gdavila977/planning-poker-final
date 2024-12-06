@@ -26,4 +26,5 @@ export interface CreateSessionRequest {
     name: string;
     description: string;
     participants: string[]; 
+    status?: 'active' | 'completed' | 'cancelled'; 
 }

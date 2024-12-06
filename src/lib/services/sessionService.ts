@@ -7,6 +7,20 @@ export class SessionService {
     /**
      * Obtiene todas las sesiones activas
      */
+
+    static async getSessionsByType(type: 'active' | 'completed'): Promise<SessionResponse> {
+        try {
+            const response = await fetch(`/api/sessions-api?type=${type}`);
+            const data: SessionResponse = await response.json();
+            return data;
+        } catch (error) {
+            return {
+                success: false,
+                message: 'Error al obtener las sesiones',
+            };
+        }
+    }
+
     static async getActiveSessions(): Promise<SessionResponse> {
         try {
             const response = await fetch('/api/sessions-api');
