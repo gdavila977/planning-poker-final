@@ -48,7 +48,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
     try {
-        const { storyId, userId, value, comment } = await request.json();
+        const { storyId, userId, voto, comment } = await request.json(); // Cambiado de value a voto
         
         if (!userId) {
             return NextResponse.json({
@@ -57,7 +57,6 @@ export async function POST(request: Request) {
             }, { status: 401 });
         }
 
-        // El resto del código se mantiene igual
         const votesCollection = await getCollection('votos');
         const existingVote = await votesCollection.findOne({
             storyId,
@@ -74,13 +73,14 @@ export async function POST(request: Request) {
         const newVote = {
             voteId: Date.now().toString(),
             storyId,
-            userId,    // Usamos el userId recibido
-            voto: value,
+            userId,
+            voto,  // Ya está como voto
             comment,
             createdAt: new Date().toISOString()
         };
 
         await votesCollection.insertOne(newVote);
+        
         return NextResponse.json({
             success: true,
             message: 'Voto registrado con éxito',

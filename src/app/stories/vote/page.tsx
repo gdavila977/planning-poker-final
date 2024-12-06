@@ -81,10 +81,9 @@ export default function VotePage() {
         try {
             const response = await StoryService.updateStoryStatus(story.storyId, 'voting');
             
-            if (response.success) {
-                const updatedStory = response.story;
-                setStory(updatedStory);
-                localStorage.setItem('currentStory', JSON.stringify(updatedStory));
+            if (response.success && response.story) { // Verificamos que story existe
+                setStory(response.story);
+                localStorage.setItem('currentStory', JSON.stringify(response.story));
                 setIsVotingStarted(true);
                 setToast({ message: 'Votación iniciada con éxito', type: 'success' });
             } else {
@@ -120,16 +119,18 @@ export default function VotePage() {
         if (!story) return;
     
         try {
-            // Obtener todos los votos
             const votesResponse = await VoteService.getVotesByStory(story.storyId);
             
             if (votesResponse.success && votesResponse.votes && votesResponse.votes.length > 0) {
-                // Calcular promedio
                 const votes = votesResponse.votes.map(v => v.voto);
                 const finalEstimate = Math.round(votes.reduce((a, b) => a + b) / votes.length);
                 
-                // Actualizar estado de la historia
-                const response = await StoryService.updateStoryStatus(story.storyId, 'completed');
+                // Actualizar la historia con el finalEstimate
+                const response = await StoryService.updateStoryStatus(
+                    story.storyId, 
+                    'completed',
+                    finalEstimate  // Añadir este parámetro
+                );
                 
                 if (response.success) {
                     const updatedStory = {
@@ -156,10 +157,9 @@ export default function VotePage() {
         try {
             const response = await StoryService.updateStoryStatus(story.storyId, 'completed');
             
-            if (response.success) {
-                const updatedStory = response.story;
-                setStory(updatedStory);
-                localStorage.setItem('currentStory', JSON.stringify(updatedStory));
+            if (response.success && response.story) { // Verificamos que story existe
+                setStory(response.story);
+                localStorage.setItem('currentStory', JSON.stringify(response.story));
                 setToast({ message: 'Tiempo de votación finalizado', type: 'success' });
             } else {
                 setToast({ message: response.message || 'Error al finalizar la votación', type: 'error' });

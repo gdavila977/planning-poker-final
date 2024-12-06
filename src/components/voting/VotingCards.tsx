@@ -31,20 +31,24 @@ export default function VotingCards({
 
     const handleSubmitVote = async () => {
         if (!selectedValue) return;
-
+    
         setIsSubmitting(true);
         try {
+            console.log('Enviando voto:', {
+                storyId,
+                voto: selectedValue,  // Cambiado de value a voto
+                comment
+            });
+    
             const response = await VoteService.submitVote(
                 storyId,
                 selectedValue,
                 comment
             );
-
+    
             if (response.success) {
                 onVoteSubmitted();
                 setShowConfirmation(false);
-            } else {
-                // Manejar error
             }
         } catch (error) {
             console.error('Error submitting vote:', error);

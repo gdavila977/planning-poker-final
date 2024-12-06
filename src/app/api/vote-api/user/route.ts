@@ -1,4 +1,4 @@
-// Ruta del archivo: /src/app/api/vote-api/route.ts
+// Ruta del archivo: /src/app/api/vote-api/user/route.ts
 
 import { NextResponse } from 'next/server';
 import { getCollection } from '@/lib/db/mongodb';

@@ -30,6 +30,8 @@ export class VoteService {
     ): Promise<VoteResponse> {
         try {
             const user = AuthService.getUserSession();
+            console.log('Intentando enviar voto:', { storyId, voto: value, userId: user?.userId });
+            
             if (!user) {
                 return {
                     success: false,
@@ -44,8 +46,8 @@ export class VoteService {
                 },
                 body: JSON.stringify({
                     storyId,
-                    userId: user.userId,  // Añadimos esta línea
-                    value,
+                    userId: user.userId,
+                    voto: value,  // Cambiado de value a voto
                     comment
                 }),
             });

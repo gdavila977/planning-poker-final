@@ -99,3 +99,27 @@ export async function PATCH(request: Request) {
         }, { status: 500 });
     }
 }
+
+export async function DELETE(request: Request) {
+    try {
+        const { storyId } = await request.json();
+        const storiesCollection = await getCollection('stories');
+        
+        // También eliminar los votos asociados
+        const votesCollection = await getCollection('votos');
+        await votesCollection.deleteMany({ storyId });
+        
+        await storiesCollection.deleteOne({ storyId });
+        
+        return NextResponse.json({
+            success: true,
+            message: 'Historia eliminada con éxito'
+        });
+    } catch (error) {
+        console.error('Error deleting story:', error);
+        return NextResponse.json({
+            success: false,
+            message: 'Error al eliminar la historia'
+        }, { status: 500 });
+    }
+}
