@@ -14,7 +14,7 @@ let db: Db | null = null;
 
 /**
  * URI de conexión a MongoDB
- * En este caso, conectamos a una instancia local de MongoDB corriendo en Docker
+ * Conectamos a una instancia local de MongoDB corriendo en Docker
  */
 const MONGODB_URI = 'mongodb://localhost:27017/planning-poker-final';
 
