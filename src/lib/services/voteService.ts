@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 // Ruta del archivo: /src/lib/services/voteService.ts
 
+import { AuthService } from "./authService";
+
 export interface Vote {
     voteId: string;
     storyId: string;
@@ -27,6 +29,16 @@ export class VoteService {
         comment?: string
     ): Promise<VoteResponse> {
         try {
+            const user = AuthService.getUserSession();
+            console.log('Intentando enviar voto:', { storyId, voto: value, userId: user?.userId });
+            
+            if (!user) {
+                return {
+                    success: false,
+                    message: 'Usuario no autenticado'
+                };
+            }
+    
             const response = await fetch('/api/vote-api', {
                 method: 'POST',
                 headers: {
@@ -34,7 +46,8 @@ export class VoteService {
                 },
                 body: JSON.stringify({
                     storyId,
-                    value,
+                    userId: user.userId,
+                    voto: value,  // Cambiado de value a voto
                     comment
                 }),
             });
@@ -77,4 +90,5 @@ export class VoteService {
             };
         }
     }
+
 }

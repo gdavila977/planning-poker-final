@@ -100,6 +100,22 @@ export default function StoriesPage() {
         }
     };
 
+    const handleDeleteStory = async (storyId: string) => {
+        try {
+            const response = await StoryService.deleteStory(storyId);
+            if (response.success) {
+                // Recargar las historias
+                if (currentSession) {
+                    loadStories(currentSession.sessionId);
+                }
+                setToast({ message: 'Historia eliminada con éxito', type: 'success' });
+            }
+        } catch (error) {
+            console.error('Error deleting story:', error);
+            setToast({ message: 'Error al eliminar la historia', type: 'error' });
+        }
+    };
+
     const handleBackToDashboard = () => {
         // Limpiar localStorage antes de volver
         localStorage.removeItem('currentSession');
@@ -193,21 +209,32 @@ export default function StoriesPage() {
                                         Estimación final: {story.finalEstimate} puntos
                                     </div>
                                 )}
-                                <button
-                                    onClick={() => {
-                                        localStorage.removeItem('currentStory'); // Limpiamos cualquier historia previa
-                                        localStorage.setItem('currentStory', JSON.stringify(story));
-                                        router.push('/stories/vote');
-                                    }}
-                                    className="mt-4 w-full py-2 px-4 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors"
-                                    disabled={story.status === 'completed'}
-                                >
-                                    {story.status === 'completed' 
-                                        ? 'Votación completada' 
-                                        : story.status === 'voting'
-                                        ? 'Participar en votación'
-                                        : 'Votación pendiente'}
-                                </button>
+                                <div className="flex flex-col space-y-2">
+                                    <button
+                                        onClick={() => {
+                                            localStorage.removeItem('currentStory');
+                                            localStorage.setItem('currentStory', JSON.stringify(story));
+                                            router.push('/stories/vote');
+                                        }}
+                                        className="w-full py-2 px-4 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors"
+                                        disabled={story.status === 'completed'}
+                                    >
+                                        {story.status === 'completed' 
+                                            ? 'Votación completada' 
+                                            : story.status === 'voting'
+                                            ? 'Participar en votación'
+                                            : 'Votación pendiente'}
+                                    </button>
+                                    
+                                    {user?.role === 'project_manager' && (
+                                        <button
+                                            onClick={() => handleDeleteStory(story.storyId)}
+                                            className="w-full py-2 px-4 bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors"
+                                        >
+                                            Eliminar Historia
+                                        </button>
+                                    )}
+                                </div>
                             </div>
                         ))}
                     </div>

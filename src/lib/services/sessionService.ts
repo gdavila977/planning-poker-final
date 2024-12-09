@@ -7,6 +7,20 @@ export class SessionService {
     /**
      * Obtiene todas las sesiones activas
      */
+
+    static async getSessionsByType(type: 'active' | 'completed'): Promise<SessionResponse> {
+        try {
+            const response = await fetch(`/api/sessions-api?type=${type}`);
+            const data: SessionResponse = await response.json();
+            return data;
+        } catch (error) {
+            return {
+                success: false,
+                message: 'Error al obtener las sesiones',
+            };
+        }
+    }
+
     static async getActiveSessions(): Promise<SessionResponse> {
         try {
             const response = await fetch('/api/sessions-api');
@@ -53,6 +67,70 @@ export class SessionService {
             return {
                 success: false,
                 message: 'Error al crear la sesión',
+            };
+        }
+    }
+
+    static async deleteSession(sessionId: string): Promise<SessionResponse> {
+        try {
+            const user = AuthService.getUserSession();
+            if (!user) {
+                return {
+                    success: false,
+                    message: 'Usuario no autenticado',
+                };
+            }
+    
+            const response = await fetch('/api/sessions-api', {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    sessionId,
+                    userId: user.userId,
+                    userRole: user.role
+                }),
+            });
+            return await response.json();
+        } catch (error) {
+            return {
+                success: false,
+                message: 'Error al eliminar la sesión',
+            };
+        }
+    }
+
+    static async updateSession(
+        sessionId: string, 
+        updateData: Partial<CreateSessionRequest>
+    ): Promise<SessionResponse> {
+        try {
+            const user = AuthService.getUserSession();
+            if (!user) {
+                return {
+                    success: false,
+                    message: 'Usuario no autenticado',
+                };
+            }
+    
+            const response = await fetch('/api/sessions-api', {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    sessionId,
+                    updateData,
+                    userId: user.userId,
+                    userRole: user.role
+                }),
+            });
+            return await response.json();
+        } catch (error) {
+            return {
+                success: false,
+                message: 'Error al actualizar la sesión',
             };
         }
     }

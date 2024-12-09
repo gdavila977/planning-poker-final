@@ -68,3 +68,58 @@ export async function POST(request: Request) {
         }, { status: 500 });
     }
 }
+
+export async function PATCH(request: Request) {
+    try {
+        const { storyId, status, finalEstimate } = await request.json();
+        
+        const updateData = {
+            status,
+            ...(finalEstimate !== undefined ? { finalEstimate } : {})
+        };
+
+        const storiesCollection = await getCollection('stories');
+        await storiesCollection.updateOne(
+            { storyId },
+            { $set: updateData }
+        );
+
+        const updatedStory = await storiesCollection.findOne({ storyId });
+
+        return NextResponse.json({
+            success: true,
+            message: 'Historia actualizada con éxito',
+            story: updatedStory
+        });
+    } catch (error) {
+        console.error('Error updating story status:', error);
+        return NextResponse.json({
+            success: false,
+            message: 'Error al actualizar el estado'
+        }, { status: 500 });
+    }
+}
+
+export async function DELETE(request: Request) {
+    try {
+        const { storyId } = await request.json();
+        const storiesCollection = await getCollection('stories');
+        
+        // También eliminar los votos asociados
+        const votesCollection = await getCollection('votos');
+        await votesCollection.deleteMany({ storyId });
+        
+        await storiesCollection.deleteOne({ storyId });
+        
+        return NextResponse.json({
+            success: true,
+            message: 'Historia eliminada con éxito'
+        });
+    } catch (error) {
+        console.error('Error deleting story:', error);
+        return NextResponse.json({
+            success: false,
+            message: 'Error al eliminar la historia'
+        }, { status: 500 });
+    }
+}
